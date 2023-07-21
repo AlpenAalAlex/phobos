@@ -47,6 +47,9 @@ def create_box(mesh, oriented=True, scale=1.0):
         transform = np.identity(4)
         transform[0:3, 3] = np.average(mesh.bound_box, axis=0)
         # transform = np.array(mesh.matrix_local).dot(transform)
+        # Multiply transform vector by 0.5
+        for i in range(0, 3):
+            transform[i][3] *= 0.5
     else:
         raise ValueError(f"Received {type(mesh)}")
 
@@ -67,6 +70,9 @@ def create_sphere(mesh, scale=1.0):
         transform = np.identity(4)
         transform[0:3, 3] = np.average(mesh.bound_box, axis=0)
         # transform = np.array(mesh.matrix_local).dot(transform)
+        # Multiply transform vector by 0.5
+        for i in range(0, 3):
+            transform[i][3] *= 0.5
     else:
         raise ValueError(f"Received {type(mesh)}")
 
@@ -108,6 +114,9 @@ def create_cylinder(mesh, scale=1.0):
         elif axis == 1:
             rpy = [np.pi/2, 0, 0]
         transform = create_transformation(xyz=np.average(mesh.bound_box, axis=0), rpy=rpy)
+        # Multiply transform vector by 0.5
+        for i in range(0, 3):
+            transform[i][3] *= 0.5
     else:
         raise ValueError(f"Received {type(mesh)}")
 
