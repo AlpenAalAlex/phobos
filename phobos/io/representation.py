@@ -257,7 +257,7 @@ class Texture(Representation):
             self.image = image
             self.input_type = "img"
             if BPY_AVAILABLE and isinstance(image, bpy.types.Image):
-                self.input_file = os.path.normpath(bpy.path.abspath(misc.sys_path(image.filepath)))
+                self.input_file = os.path.normpath(misc.sys_path(bpy.path.abspath(image.filepath)))
                 self.input_type = "img_bpy"
                 if self.unique_name is None:
                     self.unique_name, ext = os.path.splitext(image.name)
@@ -566,10 +566,16 @@ class Mesh(Representation, SmurfBase):
         # OSG has for obj a special handling which changes this https://github.com/openscenegraph/OpenSceneGraph/blob/2e4ae2ea94595995c1fc56860051410b0c0be605/src/osgPlugins/obj/ReaderWriterOBJ.cpp#L208
         # This can only be switched off via an ReaderWriter option https://github.com/openscenegraph/OpenSceneGraph/blob/2e4ae2ea94595995c1fc56860051410b0c0be605/src/osgPlugins/obj/ReaderWriterOBJ.cpp#L60
         mars_mesh = self.input_file is not None and "mars_obj" in self.input_file and ".mars.obj" in self.input_file
-        self.mesh_orientation = {
-            "up": "Z" if not mars_mesh else "Y",
-            "forward": "Y" if not mars_mesh else "-Z"
-        } if mesh_orientation is None else mesh_orientation
+        if BPY_AVAILABLE and self.input_type == "file_obj":
+            self.mesh_orientation = {
+                "up": bpy.context.preferences.addons["phobos"].preferences.obj_axis_up if not mars_mesh else "Y",
+                "forward": bpy.context.preferences.addons["phobos"].preferences.obj_axis_forward if not mars_mesh else "-Z"
+            } if mesh_orientation is None else mesh_orientation
+        else:
+            self.mesh_orientation = {
+                "up": "Z" if not mars_mesh else "Y",
+                "forward": "Y" if not mars_mesh else "-Z"
+            } if mesh_orientation is None else mesh_orientation
         self._exported = {}
         if self.input_file is not None:
             self.imported = {
@@ -809,13 +815,24 @@ class Mesh(Representation, SmurfBase):
                     log.debug(f"{self.input_file} can't be converted to bobj")
                 bpy.ops.object.delete()
             elif self.input_type == "file_dae":
-                bpy.ops.wm.collada_import(filepath=self.input_file)
+                bpy.ops.wm.collada_import(filepath=self.input_file, import_units=False)
+                # import_units=True would apply the DAE included units to the whole blender scene
+                # see https://projects.blender.org/blender/blender/issues/112557
                 self.mesh_information = mesh_io.parse_dae(self.input_file)
                 delete_objects = []
                 mesh_objects = []
                 for obj in bpy.context.selected_objects:
                     if obj.type == "MESH":
                         mesh_objects.append(obj)
+                        parent = obj.parent
+                        while parent:
+                            # if dae delivers units, the objects get scaled,
+                            # as we delete the objects and take only the meshes we need to apply those scales
+                            # REVIEW: we ignore here currently orientation changes as we assume quite simple dae's that only contain meshes
+                            #   if a dae contains more complex stuff we will probalby run into further issues that need to be tackled
+                            #   using the given example then. Please in that case open an issue.
+                            obj.scale *= parent.scale
+                            parent = parent.parent
                     else:
                         delete_objects.append(obj)
                 bpy.ops.object.select_all(action='DESELECT')
@@ -824,18 +841,29 @@ class Mesh(Representation, SmurfBase):
                 bpy.context.view_layer.objects.active = mesh_objects[0]
                 if len(mesh_objects) > 1:
                     bpy.ops.object.join()
+                # DAE meshes can contain scales. These scales are not that that may be defined by URDF.
+                # Therefore we do apply this scale here, as other software would handle it this way as well.
+                # During export the mesh will problably be overwritten with a mesh containing the true scale.
+                bpy.ops.object.transform_apply(scale=True)
                 self._mesh_object = bpy.data.meshes.new_from_object(bpy.context.object)
                 self._mesh_object.name = self.unique_name
                 bpy.ops.object.select_all(action='DESELECT')
-                for obj in delete_objects:
-                    obj.select_set(True)
-                bpy.context.view_layer.objects.active = delete_objects[0]
-                bpy.ops.object.delete()
+                if len(delete_objects+mesh_objects) > 0:
+                    for obj in delete_objects+mesh_objects:
+                        try:
+                            obj.select_set(True)
+                        except ReferenceError:
+                            pass
+                    bpy.context.view_layer.objects.active = (delete_objects+mesh_objects)[0]
+                    bpy.ops.object.delete()
             elif self.input_type == "file_bobj":
-                raise NotImplementedError("Loading of bobj meshes needs to be debugged!")
-                self.mesh_information = mesh_io.parse_bobj(self.input_file)
-                self._mesh_object = mesh_io.mesh_info_dict_2_blender(self.unique_name, **self.mesh_information)
-                bpy.context.view_layer.objects.active = bpy.data.objects.new(self.unique_name, self.mesh_object)
+                log.warn("WARNING: Loading of bobj meshes is experimental and needs to be debugged!")
+                try:
+                    self.mesh_information = mesh_io.parse_bobj(self.input_file)
+                    self._mesh_object = bpy.data.meshes.new(self.unique_name)
+                    mesh.from_pydata(self.mesh_information["vertices"], [], [f[0] for f in self.mesh_information["faces"]])
+                except:
+                    raise ImportError("BOBJ loading is an experimental feature. If you have another mesh source try that.")
             self._operations.append("_loaded_in_blender")
             self._mesh_object["input_file"] = self.input_file
             self.changed = True  # as we there might be unnoticed changes by blender
@@ -1237,8 +1265,8 @@ class GeometryFactory(Representation):
 class Collision(Representation, SmurfBase):
     _class_variables = ["name", "link", "geometry", "origin", "bitmask", "primitive"]
 
-    def __init__(self, name=None, link=None, geometry=None, origin=None, bitmask=None, noDataPackage=False,
-                 reducedDataPackage=False, ccfm=None, primitive=None, **kwargs):
+    def __init__(self, name=None, link=None, geometry=None, origin=None, bitmask=None, noDataPackage=None,
+                 reducedDataPackage=None, ccfm=None, primitive=None, **kwargs):
         _parent_xml = kwargs.get("_parent_xml", None)
         if _parent_xml is not None and link is None:
             link = _parent_xml.attrib.get("name")
@@ -1263,10 +1291,8 @@ class Collision(Representation, SmurfBase):
         self.geometry = _singular(geometry)
         assert isinstance(self.origin, Pose)
         self.bitmask = bitmask
-        if noDataPackage is not None:
-            self.noDataPackage = noDataPackage
-        if reducedDataPackage is not None:
-            self.reducedDataPackage = reducedDataPackage
+        self.noDataPackage = noDataPackage
+        self.reducedDataPackage = reducedDataPackage
         if ccfm is not None:
             self.ccfm = ccfm
         if bitmask is not None:
@@ -1524,7 +1550,7 @@ class Link(Representation, SmurfBase):
     _class_variables = ["name", "visuals", "collisions", "inertial", "kccd_hull", "origin"]
 
     def __init__(self, name=None, visuals=None, inertial=None, collisions=None, origin=None,
-                 noDataPackage=False, reducedDataPackage=False, is_human=None, kccd_hull=None, joint=None, **kwargs):
+                 noDataPackage=None, reducedDataPackage=None, is_human=None, kccd_hull=None, joint=None, **kwargs):
         SmurfBase.__init__(self, **kwargs)
         self.name = name
         self.origin = _singular(origin)
@@ -1537,12 +1563,10 @@ class Link(Representation, SmurfBase):
         for geo in self.visuals + self.collisions:
             if geo.origin.relative_to is None:
                 geo.origin.relative_to = self.name
-        if noDataPackage is not None:
-            self.noDataPackage = noDataPackage
-            self.returns += ['noDataPackage']
-        if reducedDataPackage is not None:
-            self.reducedDataPackage = reducedDataPackage
-            self.returns += ['reducedDataPackage']
+        self.noDataPackage = noDataPackage
+        self.returns += ['noDataPackage']
+        self.reducedDataPackage = reducedDataPackage
+        self.returns += ['reducedDataPackage']
         for geo in self.collisions + self.visuals:
             i = 0
             if geo.name is None:
@@ -1684,7 +1708,7 @@ class Joint(Representation, SmurfBase):
                  axis=None, origin=None, limit=None,
                  dynamics=None, safety_controller=None, calibration=None,
                  mimic=None, joint_dependencies=None, motor=None,
-                 noDataPackage=False, reducedDataPackage=False, cut_joint=False, constraint_axes=None, **kwargs):
+                 noDataPackage=None, reducedDataPackage=None, cut_joint=False, constraint_axes=None, **kwargs):
         assert name is not None
         self.name = name
         self.returns = ['name']
@@ -1708,6 +1732,7 @@ class Joint(Representation, SmurfBase):
         else:
             self.axis = None
         if origin is None and cut_joint is False:
+            log.warn(f"Created joint {name} without specified origin assuming zero-transformation")
             origin = Pose(xyz=[0, 0, 0], rpy=[0, 0, 0], relative_to=self.parent)
         self.origin = _singular(origin)
         if self.origin.relative_to is None:
@@ -1720,12 +1745,10 @@ class Joint(Representation, SmurfBase):
         self.cut_joint = cut_joint
         self.constraint_axes = _plural(constraint_axes)
         self.motor = str(motor) if motor is not None else None
-        if noDataPackage is not None:
-            self.noDataPackage = noDataPackage
-            self.returns += ["noDataPackage"]
-        if reducedDataPackage is not None:
-            self.reducedDataPackage = reducedDataPackage
-            self.returns += ["reducedDataPackage"]
+        self.noDataPackage = noDataPackage
+        self.returns += ["noDataPackage"]
+        self.reducedDataPackage = reducedDataPackage
+        self.returns += ["reducedDataPackage"]
         # dynamics
         self.dynamics = _singular(dynamics)
         SmurfBase.__init__(self, **kwargs)

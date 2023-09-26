@@ -1517,6 +1517,8 @@ class DefineJointConstraintsOperator(Operator):
 
         """
         layout = self.layout
+        if self.name.replace(" ", "_") != self.name:
+            layout.label(text="Created as "+self.name.replace(" ", "_"))
         if len(context.selected_objects) == 1:
             layout.prop(self, "name")
         layout.prop(self, "joint_type", text="joint Type")
@@ -1613,13 +1615,13 @@ class DefineJointConstraintsOperator(Operator):
             lower = self.lower
             upper = self.upper
         axis = None
+        validInput = True
         if self.joint_type in ["revolute", "prismatic", "continuous"]:
             axis = self.axis
 
-        # Check if joints can be created
-        validInput = True
-        if max(axis) == 0 and min(axis) == 0:
-            validInput = False
+            # Check if joints can be created
+            if max(axis) == 0 and min(axis) == 0:
+                validInput = False
         # set properties for each joint
         if validInput:
             for joint in (obj for obj in context.selected_objects if obj.phobostype == 'link'):
@@ -1627,7 +1629,7 @@ class DefineJointConstraintsOperator(Operator):
                 assert joint.parent is not None and joint.parent.phobostype == "link", \
                     f"You need to have a link parented to {joint.name} before you can create a joint"
                 if len(self.name) > 0:
-                    joint["joint/name"] = self.name
+                    joint["joint/name"] = self.name.replace(" ", "_")
                 jUtils.setJointConstraints(
                     joint=joint,
                     jointtype=self.joint_type,
@@ -1772,7 +1774,7 @@ class AddMotorOperator(Operator):
     maxvelocity : FloatProperty(
         name="Max Speed (m/s or rad/s)",
         default=0.0,
-        description="Maximum velocity of the joint. If you uncheck radian, you can enter °/sec here",
+        description="Maximum velocity of the joint",
     )
     controlp : FloatProperty(
         name="P Gain", default=0.0, description="P gain of position controller."
@@ -2292,10 +2294,11 @@ class AddSensorOperator(Operator):
         parameters = self.getSensorParameters()
         # Get sensor category specific class
         sensorClass = getattr(sensor_representations, self.category)
+        # TODO remember parent if link or joint is renamed
         if "link" in sensorClass._class_variables or sensorClass == sensor_representations.GPS:
             parameters["link"] = parameters.get("link", link.name)
         if "joint" in sensorClass._class_variables:
-            parameters["link"] = parameters.get("joint", link.get("joint/name", link.name))
+            parameters["joint"] = parameters.get("joint", link.get("joint/name", link.name))
         if "frame" in sensorClass._class_variables:
             parameters["frame"] = parameters.get("frame", link.name)
         sensor = sensorClass(
@@ -2304,7 +2307,7 @@ class AddSensorOperator(Operator):
             **parameters  # Pass sensor specific parameters
         )
         if hasattr(sensor, "targets"):
-            sensor.targets = [o for o in context.selected_objects if o.phobostype == "link"]
+            sensor.targets = [o.name for o in context.selected_objects if o.phobostype == "link"]
         sensor_obj = phobos2blender.createSensor(sensor, linkobj=link)
 
         # match the operator to avoid dangers of eval
