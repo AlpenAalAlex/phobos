@@ -3603,7 +3603,7 @@ class DefineCuttingPlaneOperator(Operator):
         if eUtils.check_validity(context):
             intersecting_link = eUtils.get_intersecting_link(context)
             bUtils.sortObjectToCollection(plane, collection_name)
-            plane.parent = intersecting_link
+            eUtils.parentObjectsTo(plane, intersecting_link, clear=True)
             plane.phobostype = "cuttingplane"
             plane.show_axis = False
             log("Cutting-Plane defined", 'INFO')
