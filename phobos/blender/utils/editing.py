@@ -20,7 +20,7 @@ import bpy
 import mathutils
 
 from .. import defs
-from ..phoboslog import log
+from ..phoboslog import log, ErrorMessageWithBox
 from ..utils import blender as bUtils
 from ..utils import io as ioUtils
 from ..utils import naming as nUtils
@@ -989,8 +989,11 @@ def check_validity(context):
             return True
         else:
             log("Plane does intersect no or multiple links. Plane has to intersect exactly one link", 'ERROR')
+            ErrorMessageWithBox("Plane does intersect no or multiple links. Plane has to intersect exactly one link")
             return False
     else:
         log("Selected Object is invalid for the Creation of a Cutting Plane."
             " Please choose a Plane with 4 Vertices.", 'ERROR')
+        ErrorMessageWithBox("Selected Object is invalid for the Creation of a Cutting Plane."
+            " Please choose a Plane with 4 Vertices.")
         return False

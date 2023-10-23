@@ -19,7 +19,7 @@ class SMURFRobot(XMLRobot):
                  inputfile=None, description=None, autogenerate_submechanisms=None, is_human=False, shallow=False):
         self.smurf_annotation_keys = [
             'motors', 'sensors', 'materials', "joints", "links", 'collisions', 'visuals', 'poses',
-            "submechanisms", "exoskeletons", "interfaces"
+            "submechanisms", "exoskeletons", "interfaces", "cuttingplanes"
         ]
 
         self.name = name

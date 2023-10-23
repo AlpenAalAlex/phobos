@@ -3578,13 +3578,14 @@ class DefineCuttingPlaneOperator(Operator):
     stretch_direction: FloatVectorProperty(
         name="Stretch Direction", default=[0.0, 0.0, 1],
         description="Stretch Direction of Cutting-Plane", size=3,
-        update=update_stretch_direction
+        update=update_stretch_direction, min=-1, max=1
     )
 
     def draw(self, context):
-        row1 = self.layout.row()
-        row1.label(text="Sets the Stretch Direction of the Cutting-Plane")
-        row1.prop(self, "stretch_direction")
+        col = self.layout.column()
+        col.label(text="Enter the stretch direction of the cutting plane")
+        row = col.row()
+        row.prop(self, "stretch_direction")
 
     def invoke(self, context, event):
         plane = context.active_object
@@ -3595,10 +3596,6 @@ class DefineCuttingPlaneOperator(Operator):
     def execute(self, context):
         collection_name = "cuttingplane"
         plane = context.active_object
-        if collection_name in bpy.context.scene.collection.children.keys():
-            if plane.name in bpy.data.collections[collection_name].objects.keys():
-                log("Plane is already defined as Cutting-Plane", level='WARNING')
-                return {'CANCELLED'}
 
         if eUtils.check_validity(context):
             intersecting_link = eUtils.get_intersecting_link(context)

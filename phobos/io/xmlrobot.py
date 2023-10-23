@@ -39,6 +39,7 @@ class XMLRobot(Representation):
         self.sensors = []
         self.plugins = []  # Currently just a place holder
         self.motors = []
+        self.cuttingplanes = []
         self.xmlfile = xmlfile if xmlfile is not None else _xmlfile
 
         # Default export mesh format from phobos.defs.MESH_TYPES

@@ -4,6 +4,7 @@ from copy import deepcopy
 import bpy
 import numpy as np
 from phobos.io import hyrodyn
+from math import degrees
 
 from .. import reserved_keys
 from ..model import inertia as inertiamodel
@@ -17,7 +18,9 @@ from ..utils.validation import validate
 
 from ... import core
 from ...io import representation, sensor_representations, xmlrobot
+from ...io.cuttingplanes import CuttingPlane
 from ...io.poses import JointPoseSet
+from ...io.smurf_reflection import SmurfBase
 from ...utils import misc
 
 """
@@ -690,6 +693,41 @@ def deriveSubmechanism(obj, logging=False):
     return hyrodyn.Submechanism(**values)
 
 
+def deriveCuttingPlane(obj, logging=False):
+    """This function derives a cuttingplane from a given blender object
+
+    Args:
+      obj(bpy_types.Object): The blender object to derive the cuttingplane from.
+      logging(bool, optional): whether to write log messages or not (Default value = False)
+
+    Returns:
+      : CuttingPlane -- phobos representation of the cuttingplane
+
+    """
+
+    if logging:
+        log(
+            "Deriving cuttingplane from object " + nUtils.getObjectName(obj, phobostype='cuttingplane') + ".",
+            'DEBUG',
+        )
+
+    values = {
+        k: v for k, v in obj.items()
+        if k not in reserved_keys.INTERNAL_KEYS
+    }
+
+    values["name"] = obj.name
+    values["parent"] = sUtils.getEffectiveParent(obj).name # Get intersected object that is cutted
+    xyz, rpy, _ = obj.matrix_world.decompose()
+    values["xyz"] = "{:.5f} {:.5f} {:.5f}".format(xyz[0], xyz[1], xyz[2])
+    rpy = rpy.to_euler()
+    for i in range(len(rpy)):
+        rpy[i] = degrees(rpy[i])
+    values["rpy"] = "{:.5f} {:.5f} {:.5f}".format(rpy[0], rpy[1], rpy[2])
+
+    return CuttingPlane(**values)
+
+
 # [TODO v2.1.0] Re-add light support
 # def deriveLight(obj):
 #     """This function derives a light from a given blender object
@@ -835,6 +873,9 @@ def deriveRobot(root, name='', objectlist=None):
 
     for subm in [deriveSubmechanism(obj) for obj in objectlist if obj.phobostype == 'submechanism']:
         robot.add_aggregate("submechanisms", subm)
+
+    for plane in [deriveCuttingPlane(obj) for obj in objectlist if obj.phobostype == 'cuttingplane']:
+        robot.add_aggregate("cuttingplane", plane)
 
     # Until here we have added all entities that are linkable
     robot.link_entities()
