@@ -169,6 +169,12 @@ def createPrimitive(
         bpy.ops.mesh.primitive_ico_sphere_add(
             radius=psize, location=plocation, rotation=protation
         )
+    elif ptype == 'plane':
+        bpy.ops.mesh.primitive_plane_add(
+            size=psize,
+            location=plocation,
+            rotation=protation
+        )
     else:
         log("Primitive type not found: " + ptype + ". Adding default cube instead.", 'WARNING')
         bpy.ops.mesh.primitive_cube_add(location=plocation, rotation=protation)

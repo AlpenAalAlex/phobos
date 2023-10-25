@@ -1,6 +1,7 @@
 import os
 from copy import deepcopy
 
+from . import cuttingplanes
 from .hyrodyn import Submechanism, Exoskeleton
 from .poses import JointPoseSet
 from ..commandline_logging import get_logger
@@ -327,6 +328,13 @@ class SMURFRobot(XMLRobot):
                 self.add_aggregate(
                     'interfaces',
                     representation.Interface(**interf)
+                )
+
+        if 'cuttingplanes' in self.annotations:
+            for pl in self.annotations['cuttingplanes']:
+                self.add_aggregate(
+                    'cuttingplanes',
+                    cuttingplanes.CuttingPlane(**pl)
                 )
 
         # [TODO v2.1.0] Check how we can store which properties are defined by which literals to reload them properly from file

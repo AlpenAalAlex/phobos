@@ -1,3 +1,4 @@
+import math
 from copy import deepcopy
 
 import bpy
@@ -579,6 +580,24 @@ def createRobot(robot: core.Robot):
     log("Creating interfaces...", 'INFO')
     for interface in robot.interfaces:
         newobjects.append(createInterface(interface, newlinks[interface.parent]))
+
+    log("Creating {} cuttingplanes", 'INFO')
+    for cuttingplane in robot.cuttingplanes:
+        xyz = [float(x) for x in cuttingplane.xyz.split()]
+        rpy = [math.radians(float(x)) for x in cuttingplane.rpy.split()]
+        intersecting_link = sUtils.getObjectByName(cuttingplane.parent)
+        plane = bUtils.createPrimitive(
+            cuttingplane.name,
+            'plane',
+            float(cuttingplane.size),
+            0,  # 'cuttingplanes',
+            None,
+            xyz,
+            rpy,
+            'cuttingplane'
+        )
+        bUtils.sortObjectToCollection(plane, "cuttingplane")
+        eUtils.parentObjectsTo(plane, intersecting_link, clear=True)
 
     # [TODO v2.1.0] Re-Add SRDF support
     # log("Creating groups...", 'INFO')

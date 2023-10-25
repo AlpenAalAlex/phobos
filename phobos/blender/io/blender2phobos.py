@@ -1,3 +1,4 @@
+import math
 import traceback
 from copy import deepcopy
 
@@ -724,6 +725,23 @@ def deriveCuttingPlane(obj, logging=False):
     for i in range(len(rpy)):
         rpy[i] = degrees(rpy[i])
     values["rpy"] = "{:.5f} {:.5f} {:.5f}".format(rpy[0], rpy[1], rpy[2])
+
+    # Get plane size ->
+    # Get coordinates
+    vertices = obj.data.vertices
+    vertices_coordinates = []
+    for v in vertices:
+        co_final = obj.matrix_world @ v.co
+        vertices_coordinates.append(co_final)
+
+    # Furthest distance
+    furthest = 0
+    for v in vertices_coordinates:
+        for b in vertices_coordinates:
+            d = (v-b).length
+            if d > furthest:
+                furthest = d
+    values["size"] = "{:.5f}".format(furthest/math.sqrt(2))
 
     return CuttingPlane(**values)
 
