@@ -5,7 +5,6 @@ from copy import deepcopy
 import bpy
 import numpy as np
 from phobos.io import hyrodyn
-from math import degrees
 
 from .. import reserved_keys
 from ..model import inertia as inertiamodel
@@ -19,7 +18,6 @@ from ..utils.validation import validate
 
 from ... import core
 from ...io import representation, sensor_representations, xmlrobot
-from ...io.cuttingplanes import CuttingPlane
 from ...io.poses import JointPoseSet
 from ...io.smurf_reflection import SmurfBase
 from ...utils import misc
@@ -718,13 +716,11 @@ def deriveCuttingPlane(obj, logging=False):
     }
 
     values["name"] = obj.name
-    values["parent"] = sUtils.getEffectiveParent(obj).name # Get intersected object that is cutted
+    values["parent"] = sUtils.getEffectiveParent(obj).name  # Get intersected object that is cutted
     xyz, rpy, _ = obj.matrix_world.decompose()
-    values["xyz"] = "{:.5f} {:.5f} {:.5f}".format(xyz[0], xyz[1], xyz[2])
+    values["xyz"] = xyz
     rpy = rpy.to_euler()
-    for i in range(len(rpy)):
-        rpy[i] = degrees(rpy[i])
-    values["rpy"] = "{:.5f} {:.5f} {:.5f}".format(rpy[0], rpy[1], rpy[2])
+    values["rpy"] = rpy
 
     # Get plane size ->
     # Get coordinates
@@ -743,7 +739,7 @@ def deriveCuttingPlane(obj, logging=False):
                 furthest = d
     values["size"] = "{:.5f}".format(furthest/math.sqrt(2))
 
-    return CuttingPlane(**values)
+    return representation.CuttingPlane(**values)
 
 
 # [TODO v2.1.0] Re-add light support

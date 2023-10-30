@@ -583,8 +583,8 @@ def createRobot(robot: core.Robot):
 
     log("Creating {} cuttingplanes", 'INFO')
     for cuttingplane in robot.cuttingplanes:
-        xyz = [float(x) for x in cuttingplane.xyz.split()]
-        rpy = [math.radians(float(x)) for x in cuttingplane.rpy.split()]
+        xyz = cuttingplane.get_xyz()
+        rpy = cuttingplane.get_rpy()
         intersecting_link = sUtils.getObjectByName(cuttingplane.parent)
         plane = bUtils.createPrimitive(
             cuttingplane.name,

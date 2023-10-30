@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import shutil
 from copy import deepcopy
@@ -2264,3 +2265,38 @@ class GenericAnnotation(Representation, SmurfBase):
 
     def stringable(self):
         return self.GA_name is not None
+
+
+class CuttingPlane(Representation, SmurfBase):
+    _class_variables = ["name"]
+
+    def __init__(self, name=None, xyz=None, rpy=None, parent=None, size=1, **kwargs):
+        SmurfBase.__init__(self, returns=["name", "xyz", "rpy", "parent", "size"])
+        self.name = name
+        self.set_xyz(xyz)
+        self.set_rpy(rpy)
+        self.parent = parent
+        self.size = size
+
+    def set_xyz(self, value):
+        if type(value) == str:
+            self.xyz = value
+        else:
+            self.xyz = "{:.5f} {:.5f} {:.5f}".format(value[0], value[1], value[2])
+
+    def get_xyz(self):
+        return [float(x) for x in self.xyz.split()]
+
+    def set_rpy(self, value):
+        if type(value) == str:
+            self.rpy = value
+        else:
+            for i in range(len(value)):
+                value[i] = math.degrees(value[i])
+            self.rpy = "{:.5f} {:.5f} {:.5f}".format(value[0], value[1], value[2])
+
+    def get_rpy(self):
+        return [math.radians(float(x)) for x in self.rpy.split()]
+
+    def __str__(self):
+        return self.name
