@@ -19,7 +19,8 @@ class Entity(Representation, SmurfBase):
         assert world is not None
         self.model = _singular(model)
         self.origin = _singular(origin) if origin is not None else representation.Pose()
-        self._file = os.path.normpath(os.path.join(os.path.dirname(world.inputfile), file)) if not os.path.isabs(file) else file
+        self._file = os.path.normpath(os.path.join(os.path.dirname(world.inputfile), file)) \
+            if file is not None and not os.path.isabs(file) else file
         if model is None and file is not None:
             if self._file.lower().rsplit(".", 1)[-1] in ["smurfs", "smurfa"]:
                 try:
@@ -171,8 +172,8 @@ class Arrangement(Representation, SmurfBase):
         self.name = name
         self.entities = _plural(entities)
         self._frames = _plural(frames)
+        self.inputfile = os.path.abspath(inputfile) if inputfile is not None else None
         if self.inputfile is not None:
-            self.inputfile = os.path.abspath(inputfile)
             ext = self.inputfile.lower().rsplit(".", 1)[-1]
             if ext == "sdf":
                 # [Todo v2.1.0]
@@ -193,7 +194,8 @@ class Arrangement(Representation, SmurfBase):
             name=name,
             model=robot,
             origin=origin,
-            anchor=anchor
+            anchor=anchor,
+            world=self
         ))
 
     def add_entity(self, entity):
