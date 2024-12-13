@@ -104,6 +104,10 @@ def get_default_export_config(version="default"):
     return DEFAULTS["export_config"][version]
 
 
+def get_default_gazebo_model_config():
+    return DEFAULTS["gazebo_model_config"]
+
+
 def get_default_rel_mesh_pathes():
     return DEFAULTS["rel_mesh_pathes"]
 

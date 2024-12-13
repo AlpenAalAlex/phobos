@@ -305,7 +305,8 @@
         "include_cut_joints": false,
         "filename_suffix": "",
         "ros_pathes": false,
-        "enforce_zero": false
+        "enforce_zero": false,
+        "gazebo_export": false
       },
       {
         "type": "sdf",
@@ -431,5 +432,23 @@
     "bobj": "meshes/bobj",
     "mars_obj": "meshes/mars_obj",
     "input_type": "meshes"
-  }
+  },
+  "gazebo_model_config": [
+    "<?xml version=\"1.0\"?>",
+    "",
+    "<model>",
+    "  <name>{name}</name>",
+    "  <version>{version}</version>",
+    "  <sdf>{sdf}</sdf>",
+    "",
+    "  <author>",
+    "    <name></name>",
+    "    <email></email>",
+    "  </author>",
+    "",
+    "  <description>",
+    "",
+    "  </description>",
+    "</model>"
+  ]
 }

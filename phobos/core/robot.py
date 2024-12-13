@@ -193,7 +193,7 @@ class Robot(SMURFRobot):
     def export_xml(self, outputdir=None, format="urdf", filename=None, float_fmt_dict=None, no_format_dir=False,
                    ros_pkg=False, copy_with_other_pathes=None, ros_pkg_name=None,
                    with_meshes=True, use_existing_meshes=False, mesh_format=None, additional_meshes=None, rel_mesh_pathes=None,
-                   enforce_zero=False, correct_inertials=False):
+                   enforce_zero=False, correct_inertials=False, gazebo_export=False):
         """ Exports all model information stored inside this instance.
         """
         outputdir = os.path.abspath(outputdir)
@@ -205,11 +205,13 @@ class Robot(SMURFRobot):
 
         export_robot = self.duplicate()
 
+        filename = self.name.replace('/', '_') if filename is None else filename
+
         # Main model
         if no_format_dir:
-            model_file = os.path.join(outputdir, f"{self.name.replace('/','_') if filename is None else filename}")
+            model_file = os.path.join(outputdir, f"{filename}")
         else:
-            model_file = os.path.join(outputdir, f"{format}/{self.name.replace('/','_') if filename is None else filename}")
+            model_file = os.path.join(outputdir, f"{format}/{filename}")
         if not model_file.lower().endswith(format):
             model_file += "." + format
         if not os.path.exists(os.path.dirname(os.path.abspath(model_file))):
@@ -236,6 +238,8 @@ class Robot(SMURFRobot):
             _export_robot.export_meshes(mesh_output_dir=os.path.join(outputdir, rel_mesh_pathes[mesh_format]), format=mesh_format, use_existing=True)
         if enforce_zero:
             _export_robot.enforce_zero()
+        if gazebo_export and format == "sdf":
+            _export_robot.create_model_config(outputdir, filename)
         if correct_inertials:
             _export_robot.correct_inertials()
         assert len(self.links) == len(self.joints) + 1
@@ -703,6 +707,7 @@ class Robot(SMURFRobot):
                     additional_meshes=export["additional_meshes"] if "additional_meshes" in export else None,
                     rel_mesh_pathes=rel_mesh_pathes,
                     enforce_zero=export.get("enforce_zero", False),
+                    gazebo_export=export.get("gazebo_export", False),
                     correct_inertials=export.get("correct_inertials", False),
                     use_existing_meshes=use_existing_meshes
                 )
@@ -826,6 +831,18 @@ class Robot(SMURFRobot):
                 })
             with open(packagexml_path, "w") as packagexml:
                 packagexml.write(content)
+
+    def create_model_config(self, outputdir, filename):
+        outputfile = os.path.join(outputdir, "model.config")
+        content = "\n".join(resources.get_default_gazebo_model_config())
+        formatFolder = os.path.split(outputdir)[-1]
+        content = content.format(
+            name=self.name,
+            version=self.version or "",
+            sdf="sdf/" + filename + ".sdf"
+        )
+        with open(outputfile, "w") as modelConfig:
+            modelConfig.write(content)
 
     # getters
     def get_submodel(self, name):

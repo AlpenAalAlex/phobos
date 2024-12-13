@@ -255,6 +255,11 @@ class PhobosExportSettings(bpy.types.PropertyGroup):
         description="Depending on the decimal places values that are close to zero will be set to zero",
         default=False
     )
+    gazeboExport: BoolProperty(
+        name="Create gazebo model.config",
+        description="Create a default model.config to import this model into gazebo",
+        default=False
+    )
 
     exportTextures : BoolProperty(name='Export textures', default=True)
     # outputMeshtype : EnumProperty(
@@ -1346,6 +1351,7 @@ class PhobosExportPanel(bpy.types.Panel):
         g2 = ginlayout.column(align=True)
         g2.prop(expsets, "ensurePositiveSemiDefinite")
         g2.prop(expsets, "enforceZero")
+        g2.prop(expsets, "gazeboExport")
 
         layout.separator()
 
