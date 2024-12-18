@@ -439,7 +439,7 @@
     "<model>",
     "  <name>{name}</name>",
     "  <version>{version}</version>",
-    "  <sdf>{sdf}</sdf>",
+    "  <sdf version=\"1.9\">{sdf}</sdf>",
     "",
     "  <author>",
     "    <name></name>",
