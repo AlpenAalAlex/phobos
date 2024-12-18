@@ -800,7 +800,7 @@
     "Mesh": {
       "tag": "mesh",
       "value_children": {
-        "uri": "posix_path",
+        "uri": "posix_path_sdf",
         "scale": "scale"
       }
     },

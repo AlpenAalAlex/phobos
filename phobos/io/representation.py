@@ -5,7 +5,6 @@ from copy import deepcopy
 from xml.etree import ElementTree as ET
 
 import numpy
-import numpy as np
 import trimesh
 import traceback
 
@@ -16,9 +15,10 @@ from .yaml_reflection import to_yaml
 from ..defs import BPY_AVAILABLE
 from ..geometry import io as mesh_io
 from ..geometry.geometry import identical, reduce_mesh, get_reflection_matrix, improve_mesh
-from ..utils import misc, git, transform
+from ..utils import misc, git
 from ..utils.transform import inv
 from ..utils.xml import read_relative_filename
+from ..blender.utils import io as ioUtils
 
 MESH_INFO_KEYS = ["vertex_normals", "texture_coords", "vertices", "faces"]
 MESH_DATA_TYPES = ["trimesh.base.Trimesh", "trimesh.scene.scene.Scene", "file_obj", "file_stl", "file_dae", "file_iv"]
@@ -675,6 +675,13 @@ class Mesh(Representation, SmurfBase):
     @property
     def posix_path(self):
         return misc.posix_path(self.filepath)
+
+    @property
+    def posix_path_sdf(self):
+        if getattr(ioUtils.getExpSettings(), "sdfOutputPathtype") == "gazebo":
+            return os.path.relpath(self.abs_filepath, self._related_robot_instance.outputdir).replace("\\","/")
+        else:
+            return misc.posix_path(self.filepath)
 
     @property
     def exported(self):

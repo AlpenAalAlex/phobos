@@ -44,6 +44,7 @@ class Robot(SMURFRobot):
         self.additional_files = {}
         if not shallow and assert_validity and self.links:
             self.assert_validity()
+        self.outputdir = None
 
     # export methods
     def export_meshes(self, mesh_output_dir, format=None, use_existing=False, apply_scale=False):
@@ -153,7 +154,6 @@ class Robot(SMURFRobot):
         If export_visuals is set to True, all visuals will be exported. Otherwise no visuals get exported.
         If export_collisions is set to to True, all collisions will be exported. Otherwise no collision get exported.
         """
-        # [Todo v2.1.0] Create the model.config file for gazebo
         if float_fmt_dict is None:
             float_fmt_dict = {}
         self.joints = self.get_joints_ordered_df()
@@ -204,6 +204,7 @@ class Robot(SMURFRobot):
         assert format in KINEMATIC_TYPES, format
 
         export_robot = self.duplicate()
+        self.outputdir = outputdir
 
         filename = self.name.replace('/', '_') if filename is None else filename
 
@@ -835,12 +836,12 @@ class Robot(SMURFRobot):
     def create_model_config(self, outputdir, filename):
         outputfile = os.path.join(outputdir, "model.config")
         content = "\n".join(resources.get_default_gazebo_model_config())
-        formatFolder = os.path.split(outputdir)[-1]
         content = content.format(
             name=self.name,
             version=self.version or "",
             sdf="sdf/" + filename + ".sdf"
         )
+        content += "\n"
         with open(outputfile, "w") as modelConfig:
             modelConfig.write(content)
 

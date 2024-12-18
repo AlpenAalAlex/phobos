@@ -255,10 +255,16 @@ class PhobosExportSettings(bpy.types.PropertyGroup):
         description="Depending on the decimal places values that are close to zero will be set to zero",
         default=False
     )
+
+    def setAbsolutePaths(self, context):
+        if self.gazeboExport:
+            self.sdfOutputPathtype = "gazebo"
+
     gazeboExport: BoolProperty(
-        name="Create gazebo model.config",
-        description="Create a default model.config to import this model into gazebo",
-        default=False
+        name="Create model.config for gazebo",
+        description="Create a model.config to import this model into gazebo - sets sdf file path setting to gazebo",
+        default=False,
+        update=setAbsolutePaths
     )
 
     exportTextures : BoolProperty(name='Export textures', default=True)
@@ -268,16 +274,17 @@ class PhobosExportSettings(bpy.types.PropertyGroup):
     #     description="Mesh type to use in exported " + "entity/scene files.",
     # )
     ros_rel_choices = ["relative", "ros_package", "relative + ros_style", "ros_package + relative"]
+    sdf_ros_rel_choices = ros_rel_choices+["gazebo"]
     urdfOutputPathtype : EnumProperty(
         items=tuple(((l,) * 3 for l in ros_rel_choices)),
         name='file path',
-        description="Defines how pathes are generated in " + "entity/scene files.",
+        description="Defines how paths are generated in " + "entity/scene files.",
     )
 
     sdfOutputPathtype: EnumProperty(
-        items=tuple(((l,) * 3 for l in ros_rel_choices)),
+        items=tuple(((l,) * 3 for l in sdf_ros_rel_choices)),
         name='file path',
-        description="Defines how pathes are generated in " + "entity/scene files.",
+        description="Defines how paths are generated in " + "entity/scene files.",
     )
 
     # prefixExport : StringProperty(
