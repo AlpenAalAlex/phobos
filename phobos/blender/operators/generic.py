@@ -92,12 +92,32 @@ def linkObjectLists(annotation, objectlist):
 class DynamicProperty(PropertyGroup):
     """A support class to handle dynamic properties in a temporary operator."""
 
+    def enumItems(self, context):
+        """
+
+        Args:
+          context:
+
+        Returns: Available enum items
+
+        """
+        # Available enums are stored in the string property
+        try:
+            items = [
+                (it, it, '')
+                for it in sorted(json.loads(self.stringProp))
+            ]
+        except:
+            items = [("", "", "")]
+        return sorted(items, key=lambda x: x[0])
+
     name : bpy.props.StringProperty()
     displayName : bpy.props.StringProperty()
     intProp : bpy.props.IntProperty()
     boolProp : bpy.props.BoolProperty()
     stringProp : bpy.props.StringProperty()
     floatProp : bpy.props.FloatProperty()
+    enumProp : bpy.props.EnumProperty(items=enumItems)
 
     STRING = 1
     INT = 2
@@ -105,6 +125,7 @@ class DynamicProperty(PropertyGroup):
     FLOAT = 4
     DICT = 5
     LIST = 6
+    ENUM = 7
     valueType : bpy.props.IntProperty()
 
     isEnabled : bpy.props.BoolProperty()
@@ -187,7 +208,7 @@ class DynamicProperty(PropertyGroup):
         """
         Call to add a button to delete this property
 
-        The functionality has to be implemented by the operator using DynamicProperties
+        The functionality has to be implemented by the Operator using DynamicProperties
 
         self.delete is True if the user wants to delete this DynamicProperty
         """
@@ -195,6 +216,9 @@ class DynamicProperty(PropertyGroup):
 
     def assignValue(self, name, value, boolAsString=False):
         """
+
+        Assign this property a value. Supported types are bool, string, int, float, dict, list and enum. Usage to create
+        an enum: assignValue("name", {"DYNAMIC_PROPERTY_TYPE": "enum", "OPTIONS": ["OP A", "OP B"])
 
         Args:
           name: Name of this property
@@ -230,6 +254,12 @@ class DynamicProperty(PropertyGroup):
             self.allowDisabling()
         elif isinstance(value, dict):
             self.valueType = self.DICT
+            if "DYNAMIC_PROPERTY_TYPE" in value:
+                if value["DYNAMIC_PROPERTY_TYPE"] == "enum" and "OPTIONS" in value:
+                    self.valueType = self.ENUM
+                    jsonDump = json.dumps(value["OPTIONS"])
+                    print("JSON:", jsonDump)
+                    self.stringProp = json.dumps(value["OPTIONS"])
         elif isinstance(value, list):
             self.valueType = self.LIST
         else:
@@ -244,6 +274,8 @@ class DynamicProperty(PropertyGroup):
     def assignDict(addfunc, dictionary, ignore=[], boolAsString=False):
         """
 
+        Creates a dynamic property for each dictionary element
+
         Args:
           addfunc: 
           dictionary: 
@@ -252,22 +284,32 @@ class DynamicProperty(PropertyGroup):
         Returns:
 
         """
+
         unsupported = {}
+        # Iterate all dict elements
         for propname in dictionary:
+            propValue = dictionary[propname]
+
             if propname in ignore:
                 continue
 
+            # Create a new dynamic property, assign value
             subprop = addfunc()
-            subprop.assignValue(propname, dictionary[propname], boolAsString=boolAsString)
+            subprop.assignValue(propname, propValue, boolAsString=boolAsString)
 
-            # add subcategories
-            if isinstance(dictionary[propname], dict):
-                for name, value in dictionary[propname].items():
+            # Skip the next step if this is an enum
+            if "DYNAMIC_PROPERTY_TYPE" in propValue:
+                if propValue["DYNAMIC_PROPERTY_TYPE"] == "enum" and "OPTIONS" in propValue:
+                    continue
+
+            # If the new property is a dict or list, iterate their elements
+            if isinstance(propValue, dict):
+                for name, value in propValue.items():
                     dictprop = addfunc()
                     dictprop.assignValue(name, value, boolAsString=boolAsString)
                     dictprop.assignParent(propname)
-            elif isinstance(dictionary[propname], list):
-                for value in dictionary[propname]:
+            elif isinstance(propValue, list):
+                for value in propValue:
                     listprop = addfunc()
                     listprop.assignValue("", value, boolAsString=boolAsString)
                     listprop.assignParent(propname)
@@ -348,6 +390,8 @@ class DynamicProperty(PropertyGroup):
                     prop.draw(row, properties)
                     numElem += 1
             row.label(text=f"{numElem} element"+ ("" if numElem == 1 else "s"))
+        elif self.valueType == self.ENUM:
+            row.prop(self, 'enumProp', text=self.displayName)
 
     @staticmethod
     def collectDict(properties):

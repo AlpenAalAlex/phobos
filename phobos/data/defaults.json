@@ -41,7 +41,7 @@
         "depth_image": true,
         "show_cam": false,
         "frame_offset": 1,
-        "topic": ""
+        "topic": "/camera/image_raw"
       }
     },
     "IMU": {
@@ -57,7 +57,10 @@
       "default": {}
     },
     "NodeContact": {
-      "default": {}
+      "default": {
+        "collision": "?COLLISION_DROPDOWN",
+        "topic": ""
+      }
     },
     "NodeContactForce": {
       "default": {}
@@ -120,9 +123,6 @@
       "default": {}
     },
     "JointAVGTorque": {
-      "default": {}
-    },
-    "Contact": {
       "default": {}
     },
     "NodeVelocity": {

@@ -2471,7 +2471,12 @@ class AddSensorOperator(Operator):
 
         """
         if self.category != self.currentSensor[0] or self.sensorType != self.currentSensor[1]:
-            data = resources.get_sensor(self.category, self.sensorType)
+            data = resources.get_sensor(self.category, self.sensorType).copy()
+            # Replace keywords
+            for k, v in data.items():
+                if v == "?COLLISION_DROPDOWN":
+                    collisions = [obj.name for obj in bpy.context.scene.objects if obj.phobostype == 'collision']
+                    data[k] = {"DYNAMIC_PROPERTY_TYPE": "enum", "OPTIONS": collisions}
             self.sensorProperties.clear()
             DynamicProperty.assignDict(
                 self.sensorProperties.add, data
@@ -2499,8 +2504,6 @@ class AddSensorOperator(Operator):
         # Draw sensor properties
         self.updateSensorProperties()
         for i in range(len(self.sensorProperties)):
-            name = self.sensorProperties[i].name.replace('_', ' ')
-
             self.sensorProperties[i].draw(layout, self.sensorProperties)
         layout.label(text="You can add custom properties under")
         layout.label(text="Object Properties > Custom Properties", icon="OBJECT_DATA")
