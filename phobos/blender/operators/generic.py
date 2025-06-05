@@ -297,13 +297,12 @@ class DynamicProperty(PropertyGroup):
             subprop = addfunc()
             subprop.assignValue(propname, propValue, boolAsString=boolAsString)
 
-            # Skip the next step if this is an enum
-            if "DYNAMIC_PROPERTY_TYPE" in propValue:
-                if propValue["DYNAMIC_PROPERTY_TYPE"] == "enum" and "OPTIONS" in propValue:
-                    continue
-
             # If the new property is a dict or list, iterate their elements
             if isinstance(propValue, dict):
+                # Skip this step if this property is an enum
+                if "DYNAMIC_PROPERTY_TYPE" in propValue:
+                    if propValue["DYNAMIC_PROPERTY_TYPE"] == "enum" and "OPTIONS" in propValue:
+                        continue
                 for name, value in propValue.items():
                     dictprop = addfunc()
                     dictprop.assignValue(name, value, boolAsString=boolAsString)

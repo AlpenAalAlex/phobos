@@ -160,6 +160,7 @@
         ]
       },
       "sdf": {
+        "type": "logical_camera",
         "near": 0.0,
         "far": 1.0,
         "aspect_ratio": 1.0,

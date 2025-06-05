@@ -696,7 +696,9 @@ def deriveSensor(obj, logging=False):
             values["frame"] = values.get("frame", parent.get("link/name", parent.name))
         if sensor_type == "NodePosition" and "gps" in obj.name.lower():
             sensor_type = "GPS"
-        return getattr(sensor_representations, sensor_type)(**values)
+        return getattr(sensor_representations, sensor_type)(
+            origin=deriveObjectPose(obj, effectiveparent=parent, logging=logging),
+            **values)
 
 
 def deriveMotor(obj):

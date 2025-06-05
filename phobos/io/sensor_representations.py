@@ -290,11 +290,22 @@ class CameraSensor(Sensor):
         return value*180/np.pi
 
 
+class LogicalCamera(Sensor):
+    _class_variables = ["name", "link", "frame", "near", "far", "aspect_ratio", "horizontal_fov"]
+
+    def __init__(self, name=None, link=None, frame=None, origin=None, near=0, far=1, aspect_ratio=1, horizontal_fov=1,
+                         **kwargs):
+        super().__init__(name=name, joint=None, link=link, frame=frame, origin=origin, sensortype="LogicalCamera",
+                         _sdf_type="logical_camera", near=near, far=far, aspect_ratio=aspect_ratio,
+                         horizontal_fov=horizontal_fov, _blender_type="Logical_camera", **kwargs)
+        self.returns += ['link', 'near', 'far', 'aspect_ratio', 'horizontal_fov']
+
+
 class IMU(Sensor):
     _class_variables = ["name", "link", "frame"]
 
     def __init__(self, name=None, link=None, frame=None, origin=None, **kwargs):
-        super().__init__(name=name, joint=None, link=link, frame=frame, origin=None, sensortype='NodeIMU', _sdf_type="imu",
+        super().__init__(name=name, joint=None, link=link, frame=frame, origin=origin, sensortype='NodeIMU', _sdf_type="imu",
                          _blender_type="Inertial_measurement_unit", **kwargs)
         self.returns += ['link', 'id']
 
@@ -364,7 +375,7 @@ class MultiSensor(Sensor):
 
 
 class MotorCurrent(MultiSensor):
-    type_dict = {"targets": "joints"}
+    type_dict = {"targets": "joints"} # TODO convert target links to joints on export
 
     def __init__(self, name=None, targets=None, **kwargs):
         if targets is None:
@@ -376,7 +387,7 @@ class MotorCurrent(MultiSensor):
 
 
 class JointPosition(MultiSensor):
-    type_dict = {"targets": "joints"}
+    type_dict = {"targets": "joints"} # TODO convert target links to joints on export
 
     def __init__(self, name=None, targets=None, **kwargs):
         if targets is None:
@@ -388,7 +399,7 @@ class JointPosition(MultiSensor):
 
 
 class JointVelocity(MultiSensor):
-    type_dict = {"targets": "joints"}
+    type_dict = {"targets": "joints"} # TODO convert target links to joints on export
 
     def __init__(self, name=None, targets=None, **kwargs):
         if targets is None:

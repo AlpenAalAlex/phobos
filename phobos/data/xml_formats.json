@@ -1124,6 +1124,34 @@
         }
       }
     },
+    "LogicalCamera": {
+      "tag": "sensor",
+      "attributes": {
+        "name": "name",
+        "type": "sdf_type"
+      },
+      "value_children": {
+        "always_on": "always_on",
+        "visualize": "visualize",
+        "enable_metrics": "enable_metrics"
+      },
+      "children": {
+        "pose": {
+          "classname": "Pose",
+          "varname": "origin"
+        }
+      },
+      "nested_children": {
+        "logical_camera": {
+          "value_children": {
+            "near": "near",
+            "far": "far",
+            "aspect_ratio": "aspect_ratio",
+            "horizontal_fov": "horizontal_fov"
+          }
+        }
+      }
+    },
     "NodeContact": {
       "tag": "sensor",
       "attributes": {

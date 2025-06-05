@@ -112,18 +112,11 @@
     },
     "LogicalCamera": {
       "default": {
-        "opening_height": 90,
-        "opening_width": 90
+        "near": 0,
+        "far": 1,
+        "aspect_ratio": 1,
+        "horizontal_fov": 1
       }
-    },
-    "JointLoad": {
-      "default": {}
-    },
-    "JointTorque": {
-      "default": {}
-    },
-    "JointAVGTorque": {
-      "default": {}
     },
     "NodeVelocity": {
       "default": {}
