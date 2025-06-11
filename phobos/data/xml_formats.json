@@ -314,7 +314,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -388,7 +388,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -408,7 +408,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -453,7 +453,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -485,7 +485,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -511,7 +511,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -530,7 +530,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -941,7 +941,7 @@
       "tag": "sensor",
       "attributes": {
         "name": "name",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "type": "sdf_type"
       },
       "attribute_children": {
@@ -1021,7 +1021,7 @@
       },
       "value_children": {
         "always_on": "always_on",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "visualize": "visualize",
         "topic": "topic",
         "enable_metrics": "enable_metrics"
@@ -1042,7 +1042,7 @@
       },
       "value_children": {
         "always_on": "always_on",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "visualize": "visualize",
         "topic": "topic",
         "enable_metrics": "enable_metrics"
@@ -1088,7 +1088,7 @@
       },
       "value_children": {
         "always_on": "always_on",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "visualize": "visualize",
         "topic": "topic",
         "enable_metrics": "enable_metrics"
@@ -1160,7 +1160,7 @@
       },
       "value_children": {
         "always_on": "always_on",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "visualize": "visualize",
         "topic": "topic",
         "enable_metrics": "enable_metrics"
@@ -1187,7 +1187,7 @@
       },
       "value_children": {
         "always_on": "always_on",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "visualize": "visualize",
         "topic": "topic",
         "enable_metrics": "enable_metrics"
@@ -1207,7 +1207,7 @@
       },
       "value_children": {
         "always_on": "always_on",
-        "rate": "rate",
+        "update_rate": "update_rate",
         "visualize": "visualize",
         "topic": "topic",
         "enable_metrics": "enable_metrics"
@@ -1216,6 +1216,86 @@
         "pose": {
           "classname": "Pose",
           "varname": "origin"
+        }
+      }
+    },
+    "Magnetometer": {
+      "tag": "sensor",
+      "attributes": {
+        "name": "name",
+        "type": "sdf_type"
+      },
+      "value_children": {
+        "always_on": "always_on",
+        "update_rate": "update_rate",
+        "visualize": "visualize",
+        "topic": "topic",
+        "enable_metrics": "enable_metrics"
+      },
+      "children": {
+        "pose": {
+          "classname": "Pose",
+          "varname": "origin"
+        }
+      },
+      "nested_children": {
+        "magnetometer": {
+          "nested_children": {
+            "x": {
+              "nested_children": {
+                "noise": {
+                  "attributes": {
+                    "type": "noise_type"
+                  },
+                  "value_children": {
+                    "mean": "mean_x",
+                    "stddev": "stddev_x",
+                    "bias_mean": "bias_mean_x",
+                    "bias_stddev": "bias_stddev_x",
+                    "dynamic_bias_stddev": "dynamic_bias_stddev_x",
+                    "dynamic_bias_correlation_time": "dynamic_bias_correlation_time_x",
+                    "precision": "precision_x"
+                  }
+                }
+              }
+            },
+            "y": {
+              "nested_children": {
+                "noise": {
+                  "attributes": {
+                    "type": "noise_type"
+                  },
+                  "value_children": {
+                    "mean": "mean_y",
+                    "stddev": "stddev_y",
+                    "bias_mean": "bias_mean_y",
+                    "bias_stddev": "bias_stddev_y",
+                    "dynamic_bias_stddev": "dynamic_bias_stddev_y",
+                    "dynamic_bias_correlation_time": "dynamic_bias_correlation_time_y",
+                    "precision": "precision_y"
+                  }
+                }
+              }
+            },
+            "z": {
+              "nested_children": {
+                "noise": {
+                  "attributes": {
+                    "type": "noise_type"
+                  },
+                  "value_children": {
+                    "mean": "mean_z",
+                    "stddev": "stddev_z",
+                    "bias_mean": "bias_mean_z",
+                    "bias_stddev": "bias_stddev_z",
+                    "dynamic_bias_stddev": "dynamic_bias_stddev_z",
+                    "dynamic_bias_correlation_time": "dynamic_bias_correlation_time_z",
+                    "precision": "precision_z"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

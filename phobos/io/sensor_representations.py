@@ -17,7 +17,7 @@ __IMPORTS__ = [x for x in dir() if not x.startswith("__")]
 
 class Sensor(Representation, SmurfBase):
     def __init__(self, name: str = None, joint=None, link=None, sensortype=None,
-                 rate=None, always_on=True, visualize=False, topic=None, enable_metrics=False,
+                 update_rate=None, always_on=True, visualize=False, topic=None, enable_metrics=False,
                  origin=None,
                  _sdf_type=None, _blender_type=None, **kwargs):
         if link is not None:
@@ -39,9 +39,9 @@ class Sensor(Representation, SmurfBase):
         self.origin = origin
 
         SmurfBase.__init__(self, name=name,
-                           rate=rate, always_on=always_on, visualize=visualize, topic=topic,
+                           update_rate=update_rate, always_on=always_on, visualize=visualize, topic=topic,
                            enable_metrics=enable_metrics,
-                           returns=["type", "rate"], **kwargs)
+                           returns=["type", "update_rate"], **kwargs)
 
         if self.origin is not None and self.origin.relative_to is None:
             self.origin.relative_to = link
@@ -324,6 +324,21 @@ class IMU(Sensor):
 
 NodeIMU = IMU
 __IMPORTS__ += ["NodeIMU"]
+
+
+class Magnetometer(Sensor):
+    _class_variables = ["name", "link", "frame"]
+    def __init__(self, name=None, link=None, frame=None, origin=None, **kwargs):
+        params = ["mean", "stddev", "bias_mean", "bias_stddev", "dynamic_bias_stddev", "dynamic_bias_correlation_time",
+                  "precision"]
+        for arg, value in dict(kwargs).items():
+            if arg in params:
+                kwargs.pop(arg)
+                for axis, v in dict(value).items():
+                    kwargs[arg+"_"+axis] = v
+        super().__init__(name=name, joint=None, link=link, frame=frame, origin=origin, sensortype='Magnetometer',
+                         _sdf_type="magnetometer", _blender_type="Magnetometer", **kwargs)
+
 
 
 class MultiSensor(Sensor):

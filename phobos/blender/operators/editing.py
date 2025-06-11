@@ -2503,8 +2503,7 @@ class AddSensorOperator(Operator):
 
         # Draw sensor properties
         self.updateSensorProperties()
-        for i in range(len(self.sensorProperties)):
-            self.sensorProperties[i].draw(layout, self.sensorProperties)
+        DynamicProperty.drawAll(self.sensorProperties, layout)
         layout.label(text="You can add custom properties under")
         layout.label(text="Object Properties > Custom Properties", icon="OBJECT_DATA")
 

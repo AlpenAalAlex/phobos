@@ -128,7 +128,80 @@
       "default": {}
     },
     "Magnetometer": {
-      "default": {}
+      "no noise": {
+        "noise_type": "none"
+      },
+      "gaussian noise": {
+        "noise_type": "gaussian",
+        "mean" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stddev" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "bias_mean" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "bias_stddev" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic_bias_stddev" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic_bias_correlation_time" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "gaussian quantized noise": {
+        "noise_type": "gaussian_quantized",
+        "mean" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "stddev" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "bias_mean" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "bias_stddev" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic_bias_stddev" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic_bias_correlation_time" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "precision" : {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      }
     },
     "WirelessTransceiver": {
       "default": {}
