@@ -2608,8 +2608,15 @@ class AddSensorOperator(Operator):
             origin=representation.Pose(relative_to=link.name),
             **parameters  # Pass sensor specific parameters
         )
-        if hasattr(sensor, "targets"):
-            sensor.targets = [o.name for o in context.selected_objects if o.phobostype == "link"]
+
+        if "targets" in sensorClass.type_dict or hasattr(sensor, "targets"):
+            if "targets" not in sensorClass.type_dict or "link" in sensorClass.type_dict["targets"]:
+                sensor.targets = [o.name for o in context.selected_objects if o.phobostype == "link"]
+            elif "joint" in sensorClass.type_dict["targets"]:
+                sensor.targets = [o.get("joint/name", o.name) for o in context.selected_objects if o.phobostype == "link"]
+            elif "collision" in sensorClass.type_dict["targets"]:
+                sensor.targets = [o.name for o in context.selected_objects if o.phobostype == "collision"]
+
         sensor_obj = phobos2blender.createSensor(sensor, linkobj=link)
 
         # match the operator to avoid dangers of eval

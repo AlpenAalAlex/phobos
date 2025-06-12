@@ -390,7 +390,7 @@ class MultiSensor(Sensor):
 
 
 class MotorCurrent(MultiSensor):
-    type_dict = {"targets": "joints"} # TODO convert target links to joints on export
+    type_dict = {"targets": "joints"}
 
     def __init__(self, name=None, targets=None, **kwargs):
         if targets is None:
@@ -402,7 +402,7 @@ class MotorCurrent(MultiSensor):
 
 
 class JointPosition(MultiSensor):
-    type_dict = {"targets": "joints"} # TODO convert target links to joints on export
+    type_dict = {"targets": "joints"}
 
     def __init__(self, name=None, targets=None, **kwargs):
         if targets is None:
@@ -414,7 +414,7 @@ class JointPosition(MultiSensor):
 
 
 class JointVelocity(MultiSensor):
-    type_dict = {"targets": "joints"} # TODO convert target links to joints on export
+    type_dict = {"targets": "joints"}
 
     def __init__(self, name=None, targets=None, **kwargs):
         if targets is None:
