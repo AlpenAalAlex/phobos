@@ -340,6 +340,13 @@ class Magnetometer(Sensor):
                          _sdf_type="magnetometer", _blender_type="Magnetometer", **kwargs)
 
 
+class MultiLevelLaserRangeFinder(Sensor):
+    _class_variables = ["name", "link", "frame"]
+    def __init__(self, name=None, link=None, frame=None, origin=None, **kwargs):
+        super().__init__(name=name, link=link, frame=frame, origin=origin,
+                         sensortype="MultiLevelLaserRangeFinder", _sdf_type="lidar", _blender_type="Multi_level_laser_range_finder",
+                         **kwargs)
+
 
 class MultiSensor(Sensor):
     _class_variables = ["name", "targets"]

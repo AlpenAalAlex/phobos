@@ -417,7 +417,7 @@
         }
       },
       "nested_children": {
-        "ray": {
+        "lidar": {
           "nested_children": {
             "scan": {
               "nested_children": {
